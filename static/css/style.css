@@ -21,13 +21,16 @@ a {
 .header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     flex-wrap: wrap;
     gap: 8px 20px;
     padding: 24px 0;
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 600;
     text-decoration: none;
 }
@@ -106,4 +109,10 @@ h2 {
     padding: 24px 0;
     color: #999;
     font-size: 14px;
+}
+
+/* Страница 404 */
+.not-found img {
+    display: block;
+    margin-bottom: 24px;
 }

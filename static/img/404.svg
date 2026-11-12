@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="14 14 132 132" role="img" aria-label="Часы показывают 4:04">
+  <circle cx="80" cy="80" r="58" fill="#ffffff" stroke="#222222" stroke-width="8"/>
+  <path d="M80 30 V38 M130 80 H122 M80 130 V122 M30 80 H38" stroke="#222222" stroke-width="4" stroke-linecap="round"/>
+  <path d="M80 80 L105.4 95.9" stroke="#222222" stroke-width="7" stroke-linecap="round"/>
+  <path d="M80 80 L97.9 39.8" stroke="#e8590c" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="80" cy="80" r="5" fill="#222222"/>
+</svg>

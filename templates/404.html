@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Страница не найдена — Между парами{% endblock %}
+
+{% block content %}
+<div class="not-found">
+    <img src="{% static 'img/404.svg' %}" alt="Часы показывают 4:04" width="130" height="130">
+    <h1>На часах 4:04</h1>
+    <p class="lead">В такое время здесь ничего нет. Страница не найдена.</p>
+</div>
+{% endblock %}
