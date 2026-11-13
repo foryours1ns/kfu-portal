@@ -1,0 +1,132 @@
+[
+  {
+    "model": "places.place",
+    "pk": 1,
+    "fields": {
+      "name": "Пэпэ",
+      "category": "cafe",
+      "address": "ул. Профессора Нужина, 7",
+      "description": "",
+      "latitude": "55.792457",
+      "longitude": "49.124333",
+      "is_published": true
+    }
+  },
+  {
+    "model": "places.place",
+    "pk": 2,
+    "fields": {
+      "name": "Домашняя столовая",
+      "category": "canteen",
+      "address": "ул. Университетская, 22, этаж 1",
+      "description": "",
+      "latitude": "55.790228",
+      "longitude": "49.123383",
+      "is_published": true
+    }
+  },
+  {
+    "model": "places.place",
+    "pk": 3,
+    "fields": {
+      "name": "Тюбетей",
+      "category": "fastfood",
+      "address": "ул. Университетская, 22",
+      "description": "",
+      "latitude": "55.790070",
+      "longitude": "49.123351",
+      "is_published": true
+    }
+  },
+  {
+    "model": "places.place",
+    "pk": 4,
+    "fields": {
+      "name": "Нуми",
+      "category": "cafe",
+      "address": "ул. Кремлёвская, 27",
+      "description": "",
+      "latitude": "55.792496",
+      "longitude": "49.118831",
+      "is_published": true
+    }
+  },
+  {
+    "model": "places.place",
+    "pk": 5,
+    "fields": {
+      "name": "Тюбетей",
+      "category": "fastfood",
+      "address": "ул. Кремлёвская, 21",
+      "description": "",
+      "latitude": "55.793654",
+      "longitude": "49.116015",
+      "is_published": true
+    }
+  },
+  {
+    "model": "places.place",
+    "pk": 6,
+    "fields": {
+      "name": "Трафик",
+      "category": "shop",
+      "address": "ул. Кави Наджми, 22/25, этаж 1",
+      "description": "",
+      "latitude": "55.793070",
+      "longitude": "49.117584",
+      "is_published": true
+    }
+  },
+  {
+    "model": "places.place",
+    "pk": 7,
+    "fields": {
+      "name": "Столовая",
+      "category": "canteen",
+      "address": "ул. Кремлёвская, 16А, этаж 2",
+      "description": "",
+      "latitude": "55.791991",
+      "longitude": "49.117780",
+      "is_published": true
+    }
+  },
+  {
+    "model": "places.place",
+    "pk": 8,
+    "fields": {
+      "name": "1804 Coffee",
+      "category": "coffee",
+      "address": "ул. Кремлёвская, 35, этаж 1",
+      "description": "",
+      "latitude": "55.792003",
+      "longitude": "49.122428",
+      "is_published": true
+    }
+  },
+  {
+    "model": "places.place",
+    "pk": 9,
+    "fields": {
+      "name": "Татмак",
+      "category": "fastfood",
+      "address": "ул. Пушкина, 29А",
+      "description": "",
+      "latitude": "55.792654",
+      "longitude": "49.124424",
+      "is_published": true
+    }
+  },
+  {
+    "model": "places.place",
+    "pk": 10,
+    "fields": {
+      "name": "Coffee Like",
+      "category": "coffee",
+      "address": "ул. Университетская, 20",
+      "description": "",
+      "latitude": "55.789811",
+      "longitude": "49.123212",
+      "is_published": true
+    }
+  }
+]
