@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход — Между парами{% endblock %}
+
+{% block content %}
+<h1>Вход</h1>
+
+<form method="post" class="form" novalidate>
+    {% csrf_token %}
+    {% include 'accounts/_form_fields.html' %}
+    {# Адрес, куда вернуть пользователя после входа #}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit">Войти</button>
+</form>
+
+<p class="form-note">Нет аккаунта? <a href="{% url 'accounts:signup' %}">Зарегистрироваться</a></p>
+{% endblock %}

@@ -38,6 +38,7 @@ a {
 .nav {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 16px;
 }
 
@@ -46,8 +47,23 @@ a {
     text-decoration: none;
 }
 
-.nav a:hover {
+.nav a:hover,
+.nav-button:hover {
     color: #222;
+}
+
+.nav-user {
+    color: #222;
+}
+
+/* Кнопка «Выйти» выглядит как обычная ссылка меню */
+.nav-button {
+    padding: 0;
+    border: none;
+    background: none;
+    color: #777;
+    font: inherit;
+    cursor: pointer;
 }
 
 /* Содержимое страницы */
@@ -115,4 +131,103 @@ h2 {
 .not-found img {
     display: block;
     margin-bottom: 24px;
+}
+
+/* Формы входа и регистрации */
+.form {
+    max-width: 360px;
+    margin-top: 28px;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.field input {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+}
+
+.field input:focus {
+    border-color: #222;
+    outline: none;
+}
+
+.field-help {
+    margin: 6px 0 0;
+    color: #777;
+    font-size: 14px;
+}
+
+/* Список требований к паролю */
+.password-rules {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    color: #777;
+    font-size: 14px;
+}
+
+/* Крестик и галочка нарисованы линиями одной толщины в квадрате 14×14,
+   чтобы выглядеть одинаково (символы ✕ и ✓ из шрифта получаются разными) */
+.password-rules li::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    vertical-align: -2px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23777' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 3.5l7 7M10.5 3.5l-7 7'/%3E%3C/svg%3E") no-repeat center;
+}
+
+.password-rules li.done::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23777' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 7.5l3 3 6-7'/%3E%3C/svg%3E");
+}
+
+.field-error,
+.form-errors p {
+    margin: 6px 0 0;
+    color: #c92a2a;
+    font-size: 14px;
+}
+
+.form-errors {
+    margin-bottom: 20px;
+}
+
+.form button[type="submit"] {
+    padding: 9px 18px;
+    border: 1px solid #222;
+    border-radius: 6px;
+    background: #222;
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+}
+
+.form button[type="submit"]:hover {
+    background: #000;
+}
+
+/* Неактивная кнопка: пока форма не заполнена как надо */
+.form button[type="submit"]:disabled {
+    border-color: #ccc;
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.form-note {
+    margin-top: 24px;
+    color: #777;
 }
