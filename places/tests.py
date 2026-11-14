@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.urls import reverse
 
 from .models import Place
 
@@ -42,3 +43,29 @@ class PlaceFixtureTests(TestCase):
         for place in Place.objects.all():
             # full_clean проверяет категорию, длины полей и диапазон координат
             place.full_clean()
+
+
+class PlaceListPageTests(TestCase):
+    def test_page_opens_without_places(self):
+        response = self.client.get(reverse('places:list'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_page_shows_only_published_places(self):
+        make_place(name='Видимая кофейня')
+        make_place(name='Скрытая кофейня', is_published=False)
+        response = self.client.get(reverse('places:list'))
+        self.assertContains(response, 'Видимая кофейня')
+        self.assertNotContains(response, 'Скрытая кофейня')
+
+    def test_map_data_contains_coordinates(self):
+        place = make_place(latitude='55.790400', longitude='49.121400')
+        response = self.client.get(reverse('places:list'))
+        self.assertEqual(response.context['places_data'], [{
+            'id': place.pk,
+            'name': 'Тестовая кофейня',
+            'category': 'coffee',
+            'category_label': 'Кофейня',
+            'address': 'ул. Кремлёвская, 18',
+            'lat': 55.7904,
+            'lng': 49.1214,
+        }])

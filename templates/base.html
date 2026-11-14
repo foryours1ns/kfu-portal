@@ -7,14 +7,16 @@
     <title>{% block title %}Между парами{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     <header class="header">
         <a class="logo" href="{% url 'core:home' %}">
             <img src="{% static 'img/logo.svg' %}" alt="" width="24" height="24">
             Между парами
         </a>
         <nav class="nav">
+            <a href="{% url 'places:list' %}">Карта</a>
             {% if user.is_authenticated %}
             <span class="nav-user">{{ user.username }}</span>
             {# Выход делаем формой: это POST-запрос с защитным токеном #}

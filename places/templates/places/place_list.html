@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Карта заведений — Между парами{% endblock %}
+
+{% block body_class %}page-wide{% endblock %}
+
+{% block head %}
+{# Библиотека карт Leaflet: стили. integrity — контрольная сумма файла #}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block content %}
+<h1 class="visually-hidden">Карта заведений</h1>
+
+<div class="map-page" id="map-page">
+    <aside class="map-panel">
+        <div class="map-filters" id="map-filters">
+            <button type="button" class="chip active" data-category="">Все</button>
+            {% for value, label in category_filters %}
+            <button type="button" class="chip" data-category="{{ value }}">{{ label }}</button>
+            {% endfor %}
+        </div>
+
+        <p class="map-count" id="map-count"></p>
+
+        {# В списке все заведения; скрипт оставляет видимыми те, что попали на экран карты #}
+        <ul class="map-list" id="map-list">
+            {% for place in places %}
+            <li data-id="{{ place.pk }}">
+                <button type="button" class="map-item">
+                    <span class="map-item-name">{{ place.name }}</span>
+                    <span class="map-item-meta">{{ place.get_category_display }} · {{ place.address }}</span>
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <p class="map-empty" id="map-empty" hidden>
+            В этой части карты заведений нет. Подвиньте карту или уменьшите масштаб.
+        </p>
+    </aside>
+
+    <div class="map-area">
+        <button type="button" class="map-toggle" id="map-toggle" aria-expanded="true">Скрыть список</button>
+        <div id="map"></div>
+    </div>
+</div>
+
+{# Данные о заведениях для скрипта. json_script безопасно вставляет их как JSON #}
+{{ places_data|json_script:"places-data" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="{% static 'js/places-map.js' %}"></script>
+{% endblock %}

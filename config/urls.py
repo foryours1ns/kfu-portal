@@ -10,6 +10,7 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url=static('img/favicon.svg'))),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
+    path('places/', include('places.urls')),
     path('', include('core.urls')),
 ]
 
