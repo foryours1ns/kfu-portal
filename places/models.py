@@ -1,5 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.urls import reverse
 
 
 class PlaceQuerySet(models.QuerySet):
@@ -53,3 +54,8 @@ class Place(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        """Адрес страницы заведения. Благодаря этому методу в админке
+        появляется кнопка «Смотреть на сайте»."""
+        return reverse('places:detail', args=[self.pk])

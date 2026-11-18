@@ -398,6 +398,24 @@ body.page-wide {
     font-size: 14px;
 }
 
+.map-item-link {
+    display: inline-block;
+    margin: -6px 0 12px;
+    color: #777;
+    font-size: 14px;
+}
+
+.map-item-link:hover {
+    color: #222;
+}
+
+/* Ссылка «Подробнее» в окошке метки */
+.leaflet-popup-content a {
+    display: inline-block;
+    margin-top: 4px;
+    color: #222;
+}
+
 .map-item:hover .map-item-name,
 .map-list li.active .map-item-name {
     color: #e8590c;
@@ -415,4 +433,39 @@ body.page-wide {
         border-right: none;
         border-bottom: 1px solid #e5e5e5;
     }
+}
+
+/* Страница заведения */
+.back-link {
+    margin: 0 0 24px;
+    font-size: 14px;
+}
+
+.back-link a {
+    color: #777;
+    text-decoration: none;
+}
+
+.back-link a:hover {
+    color: #222;
+}
+
+.place-meta {
+    margin: 0 0 24px;
+    color: #777;
+}
+
+.place-description p {
+    margin: 0 0 12px;
+}
+
+.place-empty {
+    color: #999;
+}
+
+.place-map {
+    height: 300px;
+    margin-top: 32px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
 }

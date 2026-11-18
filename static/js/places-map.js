@@ -50,8 +50,12 @@ document.addEventListener('DOMContentLoaded', function () {
         name.textContent = place.name;
         var meta = document.createElement('div');
         meta.textContent = place.category_label + ' · ' + place.address;
+        var link = document.createElement('a');
+        link.href = place.url;
+        link.textContent = 'Подробнее';
         box.appendChild(name);
         box.appendChild(meta);
+        box.appendChild(link);
         return box;
     }
 

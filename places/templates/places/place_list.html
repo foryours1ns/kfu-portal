@@ -33,6 +33,7 @@
                     <span class="map-item-name">{{ place.name }}</span>
                     <span class="map-item-meta">{{ place.get_category_display }} · {{ place.address }}</span>
                 </button>
+                <a class="map-item-link" href="{{ place.get_absolute_url }}">Подробнее</a>
             </li>
             {% endfor %}
         </ul>

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from .models import Place
 
@@ -27,6 +27,7 @@ def place_list(request):
             'address': place.address,
             'lat': float(place.latitude),
             'lng': float(place.longitude),
+            'url': place.get_absolute_url(),
         }
         for place in places
     ]
@@ -35,4 +36,22 @@ def place_list(request):
         'places': places,
         'places_data': places_data,
         'category_filters': CATEGORY_FILTERS,
+    })
+
+
+def place_detail(request, pk):
+    """Страница одного заведения."""
+    # Если заведения нет или оно скрыто, Django сам покажет страницу 404
+    place = get_object_or_404(Place.objects.published(), pk=pk)
+
+    # Координаты для маленькой карты (static/js/place-map.js)
+    place_data = {
+        'name': place.name,
+        'lat': float(place.latitude),
+        'lng': float(place.longitude),
+    }
+
+    return render(request, 'places/place_detail.html', {
+        'place': place,
+        'place_data': place_data,
     })
