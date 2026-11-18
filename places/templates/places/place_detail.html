@@ -12,6 +12,13 @@
 <p class="back-link"><a href="{% url 'places:list' %}">← К карте</a></p>
 
 <h1>{{ place.name }}</h1>
+<p class="place-rating">
+    {% if place.review_count %}
+    <span class="rating-score">★ {{ place.average_rating|floatformat:2 }}</span> · {{ place.review_count_label }}
+    {% else %}
+    Отзывов пока нет
+    {% endif %}
+</p>
 <p class="place-meta">{{ place.get_category_display }} · {{ place.address }}</p>
 
 {% if place.description %}
@@ -23,6 +30,85 @@
 
 <div class="place-map" id="place-map"></div>
 
+<section class="reviews-section">
+    <h2>Отзывы</h2>
+
+    {% if messages %}
+    <div class="notices">
+        {% for message in messages %}
+        <p class="notice">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if user_review %}
+    <div class="user-review-box">
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+        {% endif %}
+        {% if not user_review.author and not user_review.is_published %}
+        <p class="review-note">Вы уже отправили отзыв об этом месте — он появится на странице после проверки модератором.</p>
+        {% else %}
+        <p class="review-note">Вы уже оставили отзыв об этом месте:</p>
+        <article class="review-item">
+            <div class="review-header">
+                <span class="review-author">
+                    {% if user_review.author %}{{ user_review.author.username }}{% else %}Анонимно{% endif %}
+                </span>
+                <span>· <span class="rating-score">★ {{ user_review.rating }}</span> · {{ user_review.created_at|date:"d.m.Y" }}</span>
+                {% if not user_review.is_published %}
+                <span class="review-unpublished">· скрыт модератором</span>
+                {% endif %}
+            </div>
+            <div class="review-text">{{ user_review.text|linebreaks }}</div>
+            {% if user_review.author %}
+            <div class="review-actions">
+                <a href="{% url 'places:review_edit' place.pk user_review.pk %}" class="review-action">Изменить</a>
+                <form method="post" action="{% url 'places:review_delete' place.pk user_review.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="review-action review-action-delete">Удалить</button>
+                </form>
+            </div>
+            {% endif %}
+        </article>
+        {% endif %}
+    </div>
+    {% else %}
+    <form method="post" class="form review-form" novalidate>
+        {% csrf_token %}
+        {% if user.is_authenticated %}
+        <p class="review-note">Отзыв от имени <strong>{{ user.username }}</strong> появится на странице сразу.</p>
+        {% else %}
+        <p class="review-note">Вы не вошли в аккаунт — отзыв будет опубликован анонимно после проверки модератором.</p>
+        {% endif %}
+
+        {% include 'places/_review_form_fields.html' %}
+
+        <button type="submit">Отправить отзыв</button>
+    </form>
+    {% endif %}
+
+    {% if reviews %}
+    <ul class="review-list">
+        {% for review in reviews %}
+        <li class="review-item">
+            <div class="review-header">
+                <span class="review-author">
+                    {% if review.author %}{{ review.author.username }}{% else %}Анонимно{% endif %}
+                </span>
+                <span>· <span class="rating-score">★ {{ review.rating }}</span> · {{ review.created_at|date:"d.m.Y" }}</span>
+            </div>
+            <div class="review-text">{{ review.text|linebreaks }}</div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% elif not user_review %}
+    <p class="place-empty">Отзывов пока нет.</p>
+    {% endif %}
+</section>
+
 {{ place_data|json_script:"place-data" }}
 {% endblock %}
 
@@ -30,4 +116,5 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="{% static 'js/place-map.js' %}"></script>
+<script src="{% static 'js/rating-stars.js' %}"></script>
 {% endblock %}

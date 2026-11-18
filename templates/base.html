@@ -16,7 +16,6 @@
             Между парами
         </a>
         <nav class="nav">
-            <a href="{% url 'places:list' %}">Карта</a>
             {% if user.is_authenticated %}
             <span class="nav-user">{{ user.username }}</span>
             {# Выход делаем формой: это POST-запрос с защитным токеном #}

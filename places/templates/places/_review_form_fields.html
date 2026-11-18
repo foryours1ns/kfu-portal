@@ -1,0 +1,33 @@
+{# Поля формы отзыва: выбор оценки звёздочками и текст отзыва #}
+{% if form.non_field_errors %}
+<div class="form-errors">
+    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+</div>
+{% endif %}
+
+<div class="field">
+    <label>{{ form.rating.label }}</label>
+    <div class="star-rating" data-rating-widget>
+        <div class="star-rating-stars" role="radiogroup" aria-label="{{ form.rating.label }}">
+            {% for value, label in form.fields.rating.choices %}
+            <label class="star-rating-item" data-value="{{ value }}">
+                <input type="radio" name="rating" value="{{ value }}" required
+                       {% if form.rating.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}>
+                <span class="star-rating-icon" aria-hidden="true">★</span>
+                <span class="visually-hidden">{{ value }}</span>
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+    {% for error in form.rating.errors %}
+    <p class="field-error">{{ error }}</p>
+    {% endfor %}
+</div>
+
+<div class="field">
+    <label for="{{ form.text.id_for_label }}">{{ form.text.label }}</label>
+    {{ form.text }}
+    {% for error in form.text.errors %}
+    <p class="field-error">{{ error }}</p>
+    {% endfor %}
+</div>

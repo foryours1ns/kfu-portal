@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Изменить отзыв — {{ place.name }} — Между парами{% endblock %}
+
+{% block content %}
+<p class="back-link"><a href="{{ place.get_absolute_url }}">← К заведению «{{ place.name }}»</a></p>
+
+<h1>Изменить отзыв</h1>
+<p class="place-meta">{{ place.name }} · {{ place.address }}</p>
+
+<form method="post" class="form review-form" novalidate>
+    {% csrf_token %}
+    {% include 'places/_review_form_fields.html' %}
+
+    <div class="form-actions">
+        <button type="submit">Сохранить</button>
+        <a href="{{ place.get_absolute_url }}" class="form-cancel">Отмена</a>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/rating-stars.js' %}"></script>
+{% endblock %}

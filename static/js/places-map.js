@@ -33,29 +33,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
     places.forEach(function (place) {
         place.marker = L.circleMarker([place.lat, place.lng], MARKER);
-        place.marker.bindPopup(buildPopup(place));
+        place.marker.bindPopup(buildPopup(place), { closeButton: false, offset: [0, -6] });
         place.marker.on('popupopen', function () { setActive(place.id); });
         place.marker.on('popupclose', function () { setActive(null); });
         place.item = list.querySelector('li[data-id="' + place.id + '"]');
-        place.item.querySelector('button').addEventListener('click', function () {
-            place.marker.openPopup();
-        });
     });
 
     // Содержимое окошка собираем из элементов, а не строкой с HTML:
     // так название из базы не сможет подсунуть на страницу чужой код
     function buildPopup(place) {
         var box = document.createElement('div');
-        var name = document.createElement('strong');
+        box.className = 'map-popup';
+
+        var name = document.createElement('a');
+        name.className = 'map-popup-name';
+        name.href = place.url;
         name.textContent = place.name;
+
+        var rating = document.createElement('div');
+        rating.className = 'map-popup-rating';
+        if (place.rating) {
+            var score = document.createElement('span');
+            score.className = 'rating-score';
+            score.textContent = '★ ' + place.rating;
+            rating.appendChild(score);
+            rating.appendChild(document.createTextNode(' · ' + place.review_count_label));
+        } else {
+            rating.textContent = 'Отзывов пока нет';
+        }
+
         var meta = document.createElement('div');
+        meta.className = 'map-popup-meta';
         meta.textContent = place.category_label + ' · ' + place.address;
-        var link = document.createElement('a');
-        link.href = place.url;
-        link.textContent = 'Подробнее';
+
         box.appendChild(name);
+        box.appendChild(rating);
         box.appendChild(meta);
-        box.appendChild(link);
         return box;
     }
 

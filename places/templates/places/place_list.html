@@ -29,11 +29,17 @@
         <ul class="map-list" id="map-list">
             {% for place in places %}
             <li data-id="{{ place.pk }}">
-                <button type="button" class="map-item">
+                <a class="map-item" href="{{ place.get_absolute_url }}">
                     <span class="map-item-name">{{ place.name }}</span>
+                    <span class="map-item-rating">
+                        {% if place.review_count %}
+                        <span class="rating-score">★ {{ place.average_rating|floatformat:2 }}</span> · {{ place.review_count_label }}
+                        {% else %}
+                        Отзывов пока нет
+                        {% endif %}
+                    </span>
                     <span class="map-item-meta">{{ place.get_category_display }} · {{ place.address }}</span>
-                </button>
-                <a class="map-item-link" href="{{ place.get_absolute_url }}">Подробнее</a>
+                </a>
             </li>
             {% endfor %}
         </ul>

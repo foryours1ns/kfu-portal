@@ -15,6 +15,7 @@ body {
 
 a {
     color: inherit;
+    text-decoration: none;
 }
 
 /* Шапка */
@@ -32,7 +33,10 @@ a {
     align-items: center;
     gap: 8px;
     font-weight: 600;
-    text-decoration: none;
+}
+
+.logo:hover {
+    color: #e8590c;
 }
 
 .nav {
@@ -44,12 +48,11 @@ a {
 
 .nav a {
     color: #777;
-    text-decoration: none;
 }
 
 .nav a:hover,
 .nav-button:hover {
-    color: #222;
+    color: #e8590c;
 }
 
 .nav-user {
@@ -109,6 +112,17 @@ h2 {
     border-bottom: 1px solid #e5e5e5;
 }
 
+.section-link {
+    display: block;
+    width: 100%;
+    margin: -16px 0;
+    padding: 16px 0;
+}
+
+.section-link:hover h2 {
+    color: #e8590c;
+}
+
 .sections p {
     margin: 2px 0 0;
     color: #777;
@@ -149,7 +163,9 @@ h2 {
     font-weight: 600;
 }
 
-.field input {
+.field input,
+.field select,
+.field textarea {
     width: 100%;
     padding: 9px 11px;
     border: 1px solid #ccc;
@@ -159,7 +175,13 @@ h2 {
     font: inherit;
 }
 
-.field input:focus {
+.field textarea {
+    resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
     border-color: #222;
     outline: none;
 }
@@ -230,6 +252,14 @@ h2 {
 .form-note {
     margin-top: 24px;
     color: #777;
+}
+
+.form-note a {
+    color: #222;
+}
+
+.form-note a:hover {
+    color: #e8590c;
 }
 
 /* Текст только для программ чтения с экрана: на странице его не видно */
@@ -377,18 +407,25 @@ body.page-wide {
 
 .map-item {
     display: block;
-    width: 100%;
     padding: 12px 0;
-    border: none;
-    background: none;
     color: inherit;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
+    text-decoration: none;
 }
 
 .map-item-name {
     display: block;
+    font-weight: 600;
+}
+
+.map-item-rating {
+    display: block;
+    color: #777;
+    font-size: 14px;
+}
+
+.rating-score {
+    white-space: nowrap;
+    color: #222;
     font-weight: 600;
 }
 
@@ -398,22 +435,49 @@ body.page-wide {
     font-size: 14px;
 }
 
-.map-item-link {
+/* Всплывающая табличка над меткой на карте */
+.leaflet-popup {
+    margin-bottom: 8px;
+}
+
+.leaflet-popup-tip-container {
+    display: none;
+}
+
+.leaflet-popup-content-wrapper {
+    padding: 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    color: #222;
+    box-shadow: none;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+    line-height: 1.45;
+}
+
+.map-popup {
+    padding: 10px 14px;
+}
+
+.leaflet-container a.map-popup-name {
     display: inline-block;
-    margin: -6px 0 12px;
+    color: #222;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.leaflet-container a.map-popup-name:hover {
+    color: #e8590c;
+}
+
+.map-popup-rating,
+.map-popup-meta {
+    margin-top: 2px;
     color: #777;
-    font-size: 14px;
-}
-
-.map-item-link:hover {
-    color: #222;
-}
-
-/* Ссылка «Подробнее» в окошке метки */
-.leaflet-popup-content a {
-    display: inline-block;
-    margin-top: 4px;
-    color: #222;
+    font-size: 13px;
 }
 
 .map-item:hover .map-item-name,
@@ -443,11 +507,15 @@ body.page-wide {
 
 .back-link a {
     color: #777;
-    text-decoration: none;
 }
 
 .back-link a:hover {
-    color: #222;
+    color: #e8590c;
+}
+
+.place-rating {
+    margin: -4px 0 4px;
+    color: #777;
 }
 
 .place-meta {
@@ -468,4 +536,177 @@ body.page-wide {
     margin-top: 32px;
     border: 1px solid #e5e5e5;
     border-radius: 6px;
+}
+
+/* Отзывы на странице заведения */
+.reviews-section {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid #e5e5e5;
+}
+
+.reviews-section h2 {
+    margin-bottom: 16px;
+    font-size: 20px;
+}
+
+.notices {
+    margin-bottom: 20px;
+}
+
+.notice {
+    margin: 0 0 8px;
+    padding: 10px 12px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    color: #222;
+    font-size: 14px;
+}
+
+.review-form {
+    max-width: none;
+    margin: 0 0 32px;
+}
+
+.review-note {
+    margin: 0 0 16px;
+    color: #777;
+    font-size: 14px;
+}
+
+.user-review-box {
+    margin-bottom: 32px;
+    padding: 16px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+}
+
+.user-review-box .review-note {
+    margin-bottom: 12px;
+}
+
+.user-review-box .review-note:last-child {
+    margin-bottom: 0;
+}
+
+.review-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.review-list .review-item {
+    padding: 16px 0;
+    border-top: 1px solid #e5e5e5;
+}
+
+.review-header {
+    margin-bottom: 6px;
+    color: #777;
+    font-size: 14px;
+}
+
+.review-author {
+    color: #222;
+    font-weight: 600;
+}
+
+.review-unpublished {
+    color: #c92a2a;
+}
+
+.review-text p {
+    margin: 0 0 8px;
+}
+
+.review-text p:last-child {
+    margin-bottom: 0;
+}
+
+.review-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.review-actions form {
+    margin: 0;
+}
+
+.review-action {
+    padding: 0;
+    border: none;
+    background: none;
+    color: #777;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.review-action:hover {
+    color: #e8590c;
+}
+
+.review-action-delete:hover {
+    color: #c92a2a;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.form-cancel {
+    color: #777;
+    font-size: 14px;
+}
+
+.form-cancel:hover {
+    color: #e8590c;
+}
+
+/* Выбор оценки звёздочками в форме отзыва */
+.star-rating-stars {
+    display: inline-flex;
+    margin-left: -3px;
+}
+
+.field label.star-rating-item {
+    position: relative;
+    display: inline-block;
+    margin: 0;
+    padding: 2px 3px;
+    font-weight: normal;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+}
+
+.star-rating-item input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.star-rating-icon {
+    display: block;
+    color: #ccc;
+    font-size: 26px;
+    transition: color 0.1s ease;
+}
+
+.star-rating-item.active .star-rating-icon {
+    color: #e8590c;
+}
+
+.star-rating-item input:focus-visible + .star-rating-icon {
+    outline: 2px solid #222;
+    outline-offset: 2px;
+    border-radius: 3px;
 }
