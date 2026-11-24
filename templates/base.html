@@ -17,7 +17,7 @@
         </a>
         <nav class="nav">
             {% if user.is_authenticated %}
-            <span class="nav-user">{{ user.username }}</span>
+            <a class="nav-user" href="{{ user.get_absolute_url }}">{{ user.username }}</a>
             {# Выход делаем формой: это POST-запрос с защитным токеном #}
             <form method="post" action="{% url 'accounts:logout' %}">
                 {% csrf_token %}
@@ -30,13 +30,17 @@
         </nav>
     </header>
 
+    {% if messages %}
+    <div class="notices" role="status" aria-live="polite">
+        {% for message in messages %}
+        <p class="notice">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <main>
         {% block content %}{% endblock %}
     </main>
-
-    <footer class="footer">
-        Студенческий портал КФУ, учебный проект
-    </footer>
 
     {% block scripts %}{% endblock %}
 </body>

@@ -222,7 +222,7 @@ class ReviewFlowTests(TestCase):
         self.assertFalse(review.is_published)
         self.assertContains(
             response,
-            'Спасибо! Отзыв отправлен на модерацию и появится после проверки.',
+            'Спасибо! Отзыв отправлен на модерацию и появится после проверки',
         )
         # Пока модератор не одобрил, сам текст отзыва и рейтинг не показываются
         self.assertNotContains(response, 'Вкусная выпечка')

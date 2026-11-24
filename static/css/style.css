@@ -50,13 +50,13 @@ a {
     color: #777;
 }
 
+.nav a.nav-user {
+    color: #222;
+}
+
 .nav a:hover,
 .nav-button:hover {
     color: #e8590c;
-}
-
-.nav-user {
-    color: #222;
 }
 
 /* Кнопка «Выйти» выглядит как обычная ссылка меню */
@@ -132,13 +132,6 @@ h2 {
     color: #999;
     font-size: 14px;
     white-space: nowrap;
-}
-
-/* Подвал */
-.footer {
-    padding: 24px 0;
-    color: #999;
-    font-size: 14px;
 }
 
 /* Страница 404 */
@@ -272,7 +265,7 @@ h2 {
     white-space: nowrap;
 }
 
-/* Широкая страница (карта): на весь экран, без узкой колонки и подвала */
+/* Широкая страница (карта): на весь экран, без узкой колонки */
 body.page-wide {
     display: flex;
     flex-direction: column;
@@ -290,10 +283,6 @@ body.page-wide {
     flex: 1;
     min-height: 0;
     padding: 0;
-}
-
-.page-wide .footer {
-    display: none;
 }
 
 /* Карта заведений: слева список, справа карта */
@@ -550,17 +539,42 @@ body.page-wide {
     font-size: 20px;
 }
 
+/* Всплывающее уведомление сверху экрана (не двигает вёрстку и исчезает само) */
 .notices {
-    margin-bottom: 20px;
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    z-index: 2000;
+    transform: translateX(-50%);
+    pointer-events: none;
 }
 
 .notice {
     margin: 0 0 8px;
-    padding: 10px 12px;
-    border: 1px solid #e5e5e5;
+    padding: 8px 16px;
+    border: 1px solid #222;
     border-radius: 6px;
-    color: #222;
+    background: #222;
+    color: #fff;
     font-size: 14px;
+    white-space: nowrap;
+    animation: notice-toast 2.8s ease forwards;
+}
+
+@keyframes notice-toast {
+    0% {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    12%, 82% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-8px);
+        visibility: hidden;
+    }
 }
 
 .review-form {
@@ -601,14 +615,33 @@ body.page-wide {
 }
 
 .review-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
     margin-bottom: 6px;
     color: #777;
     font-size: 14px;
 }
 
 .review-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     color: #222;
     font-weight: 600;
+}
+
+.review-avatar {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+a.review-author:hover {
+    color: #e8590c;
 }
 
 .review-unpublished {
@@ -709,4 +742,90 @@ body.page-wide {
     outline: 2px solid #222;
     outline-offset: 2px;
     border-radius: 3px;
+}
+
+/* Профиль пользователя */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.profile-header h1 {
+    margin: 0;
+}
+
+.avatar-picker {
+    display: block;
+    flex-shrink: 0;
+    line-height: 0;
+    cursor: pointer;
+}
+
+.avatar {
+    display: block;
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: box-shadow 0.12s ease;
+}
+
+.avatar-picker:hover .avatar {
+    box-shadow: 0 0 0 2px #e8590c;
+}
+
+.avatar-remove-row {
+    margin: 4px 0 0;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.avatar-remove-link {
+    color: #777;
+}
+
+.avatar-remove-link:hover {
+    color: #e8590c;
+}
+
+.profile-info {
+    margin: 24px 0 0;
+}
+
+.profile-row {
+    padding: 14px 0;
+    border-top: 1px solid #e5e5e5;
+}
+
+.profile-row:last-child {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.profile-row dt {
+    margin-bottom: 2px;
+    color: #777;
+    font-size: 14px;
+}
+
+.profile-row dd {
+    margin: 0;
+}
+
+.profile-bio p {
+    margin: 0 0 8px;
+}
+
+.profile-bio p:last-child {
+    margin-bottom: 0;
+}
+
+.profile-link {
+    color: #222;
+}
+
+.profile-link:hover {
+    color: #e8590c;
 }

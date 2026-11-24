@@ -60,3 +60,72 @@ class LoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['username'].label = 'Логин'
+
+
+MAX_AVATAR_SIZE = 5 * 1024 * 1024  # 5 МБ
+
+
+class ProfileForm(forms.ModelForm):
+    """Форма редактирования профиля студента."""
+
+    class Meta:
+        model = User
+        fields = ('avatar', 'display_name', 'faculty', 'telegram', 'bio')
+        labels = {
+            'avatar': 'Аватар',
+            'display_name': 'Имя',
+            'faculty': 'Институт или факультет',
+            'telegram': 'Telegram',
+            'bio': 'О себе',
+        }
+        help_texts = {
+            'avatar': 'Картинка JPG, PNG или WebP до 5 МБ',
+            'display_name': 'До 25 символов',
+            'telegram': 'Юзернейм Telegram, например @ivan_kfu или ivan_kfu',
+            'bio': 'До 300 символов: курс, направление или пара слов о себе',
+        }
+        widgets = {
+            'avatar': forms.FileInput(attrs={'accept': 'image/*'}),
+            'bio': forms.Textarea(attrs={'rows': 3}),
+        }
+        error_messages = {
+            'avatar': {
+                'invalid_image': 'Загрузите корректное изображение.',
+            },
+            'display_name': {
+                'max_length': 'Имя не должно быть длиннее 25 символов.',
+            },
+            'telegram': {
+                'max_length': 'Юзернейм в Telegram должен быть от 5 до 32 символов.',
+            },
+            'bio': {
+                'max_length': 'Поле «О себе» не должно быть длиннее 300 символов.',
+            },
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['faculty'].choices = [('', 'Не указан')] + list(User.Faculty.choices)
+        # Валидаторы модели запустятся после clean_telegram(), когда мы уже уберём символ @
+        self.fields['telegram'].validators = []
+
+    def clean_avatar(self):
+        avatar = self.cleaned_data.get('avatar')
+        if avatar and hasattr(avatar, 'size') and avatar.size > MAX_AVATAR_SIZE:
+            raise ValidationError('Размер файла не должен превышать 5 МБ.')
+        return avatar
+
+    def clean_display_name(self):
+        return self.cleaned_data['display_name'].strip()
+
+    def clean_telegram(self):
+        raw = self.cleaned_data['telegram'].strip()
+        if not raw:
+            return ''
+        username = raw.lstrip('@')
+        if not username:
+            raise ValidationError('Укажите корректный юзернейм в Telegram.')
+        return username
+
+    def clean_bio(self):
+        return self.cleaned_data['bio'].strip()

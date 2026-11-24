@@ -90,7 +90,7 @@ def place_detail(request, pk):
                 review.author = request.user
                 review.is_published = True
                 review.save()
-                messages.success(request, 'Ваш отзыв опубликован.')
+                messages.success(request, 'Ваш отзыв опубликован')
             else:
                 review.is_published = False
                 review.save()
@@ -99,7 +99,7 @@ def place_detail(request, pk):
                 request.session[SESSION_ANON_REVIEWS_KEY] = anon_reviews
                 messages.success(
                     request,
-                    'Спасибо! Отзыв отправлен на модерацию и появится после проверки.',
+                    'Спасибо! Отзыв отправлен на модерацию и появится после проверки',
                 )
             return redirect('places:detail', pk=place.pk)
     else:
@@ -136,7 +136,7 @@ def review_edit(request, pk, review_pk):
         form = ReviewForm(request.POST, instance=review)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Отзыв обновлён.')
+            messages.success(request, 'Отзыв обновлён')
             return redirect('places:detail', pk=place.pk)
     else:
         form = ReviewForm(instance=review)
@@ -155,5 +155,5 @@ def review_delete(request, pk, review_pk):
     place = get_object_or_404(Place.objects.published(), pk=pk)
     review = get_object_or_404(Review, pk=review_pk, place=place, author=request.user)
     review.delete()
-    messages.success(request, 'Отзыв удалён.')
+    messages.success(request, 'Отзыв удалён')
     return redirect('places:detail', pk=place.pk)

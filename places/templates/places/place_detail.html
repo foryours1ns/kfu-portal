@@ -33,14 +33,6 @@
 <section class="reviews-section">
     <h2>Отзывы</h2>
 
-    {% if messages %}
-    <div class="notices">
-        {% for message in messages %}
-        <p class="notice">{{ message }}</p>
-        {% endfor %}
-    </div>
-    {% endif %}
-
     {% if user_review %}
     <div class="user-review-box">
         {% if form.non_field_errors %}
@@ -54,9 +46,17 @@
         <p class="review-note">Вы уже оставили отзыв об этом месте:</p>
         <article class="review-item">
             <div class="review-header">
+                {% if user_review.author %}
+                <a class="review-author" href="{{ user_review.author.get_absolute_url }}">
+                    <img class="review-avatar" src="{{ user_review.author.avatar_url }}" alt="" width="24" height="24">
+                    {{ user_review.author.username }}
+                </a>
+                {% else %}
                 <span class="review-author">
-                    {% if user_review.author %}{{ user_review.author.username }}{% else %}Анонимно{% endif %}
+                    <img class="review-avatar" src="{% static 'img/anon-avatar.svg' %}" alt="" width="24" height="24">
+                    Анонимно
                 </span>
+                {% endif %}
                 <span>· <span class="rating-score">★ {{ user_review.rating }}</span> · {{ user_review.created_at|date:"d.m.Y" }}</span>
                 {% if not user_review.is_published %}
                 <span class="review-unpublished">· скрыт модератором</span>
@@ -95,9 +95,17 @@
         {% for review in reviews %}
         <li class="review-item">
             <div class="review-header">
+                {% if review.author %}
+                <a class="review-author" href="{{ review.author.get_absolute_url }}">
+                    <img class="review-avatar" src="{{ review.author.avatar_url }}" alt="" width="24" height="24">
+                    {{ review.author.username }}
+                </a>
+                {% else %}
                 <span class="review-author">
-                    {% if review.author %}{{ review.author.username }}{% else %}Анонимно{% endif %}
+                    <img class="review-avatar" src="{% static 'img/anon-avatar.svg' %}" alt="" width="24" height="24">
+                    Анонимно
                 </span>
+                {% endif %}
                 <span>· <span class="rating-score">★ {{ review.rating }}</span> · {{ review.created_at|date:"d.m.Y" }}</span>
             </div>
             <div class="review-text">{{ review.text|linebreaks }}</div>

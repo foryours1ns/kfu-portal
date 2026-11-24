@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль {{ profile_user.username }} — Между парами{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    {% if is_own_profile %}
+    <label for="id_avatar" class="avatar-picker" title="Нажмите, чтобы сменить аватар">
+        <img class="avatar" src="{{ profile_user.avatar_url }}" alt="{{ profile_user.username }}" width="64" height="64">
+    </label>
+    {% else %}
+    <img class="avatar" src="{{ profile_user.avatar_url }}" alt="{{ profile_user.username }}" width="64" height="64">
+    {% endif %}
+
+    <div class="profile-title-box">
+        <h1>Профиль {{ profile_user.username }}</h1>
+        {% if is_own_profile and profile_user.avatar %}
+        <p class="avatar-remove-row">
+            <a href="#" class="avatar-remove-link" id="remove-avatar-link"
+               data-confirm="Удалить текущий аватар?">Удалить аватар</a>
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+{% if is_own_profile %}
+{% for error in form.avatar.errors %}
+<p class="field-error">{{ error }}</p>
+{% endfor %}
+
+<form method="post" enctype="multipart/form-data" class="form" novalidate>
+    {% csrf_token %}
+    <input type="file" name="avatar" id="id_avatar" accept="image/*" class="visually-hidden">
+    <input type="hidden" name="remove_avatar" id="remove-avatar-input" value="">
+
+    {% if form.non_field_errors %}
+    <div class="form-errors">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+    </div>
+    {% endif %}
+
+    {% for field in form %}
+    {% if field.name != 'avatar' %}
+    <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}
+        <p class="field-error">{{ error }}</p>
+        {% endfor %}
+        {% if field.help_text %}
+        <p class="field-help">{{ field.help_text }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <button type="submit">Сохранить</button>
+</form>
+{% else %}
+{% if has_profile_info %}
+<dl class="profile-info">
+    {% if profile_user.display_name %}
+    <div class="profile-row">
+        <dt>Имя</dt>
+        <dd>{{ profile_user.display_name }}</dd>
+    </div>
+    {% endif %}
+
+    {% if profile_user.faculty %}
+    <div class="profile-row">
+        <dt>Институт или факультет</dt>
+        <dd>{{ profile_user.get_faculty_display }}</dd>
+    </div>
+    {% endif %}
+
+    {% if profile_user.telegram %}
+    <div class="profile-row">
+        <dt>Telegram</dt>
+        <dd>
+            <a class="profile-link" href="https://t.me/{{ profile_user.telegram }}"
+               target="_blank" rel="noopener noreferrer">@{{ profile_user.telegram }}</a>
+        </dd>
+    </div>
+    {% endif %}
+
+    {% if profile_user.bio %}
+    <div class="profile-row">
+        <dt>О себе</dt>
+        <dd class="profile-bio">{{ profile_user.bio|linebreaks }}</dd>
+    </div>
+    {% endif %}
+</dl>
+{% else %}
+<p class="place-empty">Пользователь пока ничего о себе не указал.</p>
+{% endif %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}
