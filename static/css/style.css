@@ -231,7 +231,7 @@ h2 {
     cursor: pointer;
 }
 
-.form button[type="submit"]:hover {
+.form button[type="submit"]:hover:not(:disabled) {
     background: #000;
 }
 
@@ -346,8 +346,9 @@ body.page-wide {
     cursor: pointer;
 }
 
-.map-toggle:hover {
-    border-color: #222;
+.map-toggle:hover,
+.map-toggle:active {
+    border-color: #e8590c;
 }
 
 .map-filters {
@@ -365,10 +366,12 @@ body.page-wide {
     font: inherit;
     font-size: 14px;
     cursor: pointer;
+    transition: border-color 0.12s ease;
 }
 
-.chip:hover {
-    border-color: #222;
+.chip:hover,
+.chip:active {
+    border-color: #e8590c;
 }
 
 .chip.active {
@@ -828,4 +831,125 @@ a.review-author:hover {
 
 .profile-link:hover {
     color: #e8590c;
+}
+
+/* Раздел «Мемы» */
+.memes-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 28px;
+}
+
+.memes-sort {
+    display: flex;
+    gap: 6px;
+}
+
+.memes-login-note {
+    color: #777;
+    font-size: 14px;
+}
+
+.meme-upload-form {
+    max-width: none;
+    margin: 0 0 32px;
+    padding: 20px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+}
+
+.meme-upload-form input[type="file"] {
+    padding: 6px 0;
+    border: none;
+    border-radius: 0;
+}
+
+.meme-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.meme-item {
+    padding: 24px 0;
+    border-top: 1px solid #e5e5e5;
+}
+
+.meme-item:last-child {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.meme-caption {
+    margin: 8px 0 12px;
+}
+
+.meme-image-box {
+    margin-top: 10px;
+}
+
+.meme-image {
+    display: block;
+    max-width: 100%;
+    max-height: 540px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+}
+
+.meme-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.meme-delete-form {
+    margin: 0;
+}
+
+.meme-vote-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 4px;
+    border: 1px solid #e5e5e5;
+    border-radius: 999px;
+}
+
+.vote-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: #777;
+    cursor: pointer;
+}
+
+.vote-btn:hover {
+    color: #222;
+}
+
+.vote-btn.vote-up.active {
+    color: #e8590c;
+}
+
+.vote-btn.vote-down.active {
+    color: #222;
+}
+
+.vote-score {
+    min-width: 24px;
+    padding: 0 4px;
+    color: #222;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
 }

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мемы — Между парами{% endblock %}
+
+{% block content %}
+<h1 class="visually-hidden">Мемы</h1>
+
+<div class="memes-toolbar">
+    <div class="memes-sort">
+        <a href="{% url 'memes:list' %}" class="chip {% if sort == 'new' %}active{% endif %}">Новые</a>
+        <a href="{% url 'memes:list' %}?sort=top" class="chip {% if sort == 'top' %}active{% endif %}">Топ</a>
+    </div>
+
+    {% if user.is_authenticated %}
+    <button type="button" class="chip" id="meme-upload-toggle"
+            aria-expanded="{{ form_open|yesno:'true,false' }}">
+        Предложить мем
+    </button>
+    {% else %}
+    <span class="memes-login-note">Войдите, чтобы предложить мем</span>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated %}
+<form method="post" enctype="multipart/form-data" class="form meme-upload-form"
+      id="meme-upload-form" {% if not form_open %}hidden{% endif %} novalidate>
+    {% csrf_token %}
+    <p class="review-note">Мем появится в общей ленте после проверки модератором.</p>
+
+    {% if form.non_field_errors %}
+    <div class="form-errors">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+    </div>
+    {% endif %}
+
+    {% for field in form %}
+    <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}
+        <p class="field-error">{{ error }}</p>
+        {% endfor %}
+        {% if field.help_text %}
+        <p class="field-help">{{ field.help_text }}</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <button type="submit">Отправить на модерацию</button>
+</form>
+{% endif %}
+
+{% if memes %}
+<ul class="meme-list">
+    {% for meme in memes %}
+    <li class="meme-item">
+        <div class="review-header">
+            <a class="review-author" href="{{ meme.author.get_absolute_url }}">
+                <img class="review-avatar" src="{{ meme.author.avatar_url }}" alt="" width="24" height="24">
+                {{ meme.author.username }}
+            </a>
+            <span>· {{ meme.created_at|date:"d.m.Y" }}</span>
+        </div>
+
+        {% if meme.caption %}
+        <p class="meme-caption">{{ meme.caption }}</p>
+        {% endif %}
+
+        <div class="meme-image-box">
+            <img class="meme-image" src="{{ meme.image.url }}" alt="{{ meme.caption|default:'Мем' }}" loading="lazy">
+        </div>
+
+        <div class="meme-footer">
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'memes:vote' meme.pk %}" class="meme-vote-form" data-vote-form>
+                {% csrf_token %}
+                <button type="submit" name="value" value="1"
+                        class="vote-btn vote-up {% if meme.user_vote == 1 %}active{% endif %}"
+                        aria-label="За">
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/>
+                    </svg>
+                </button>
+                <span class="vote-score" data-vote-score>{{ meme.score }}</span>
+                <button type="submit" name="value" value="-1"
+                        class="vote-btn vote-down {% if meme.user_vote == -1 %}active{% endif %}"
+                        aria-label="Против">
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/>
+                    </svg>
+                </button>
+            </form>
+            {% else %}
+            <div class="meme-vote-form">
+                <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}"
+                   class="vote-btn" aria-label="Войти, чтобы проголосовать за">
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/>
+                    </svg>
+                </a>
+                <span class="vote-score">{{ meme.score }}</span>
+                <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}"
+                   class="vote-btn" aria-label="Войти, чтобы проголосовать против">
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/>
+                    </svg>
+                </a>
+            </div>
+            {% endif %}
+
+            {% if meme.author == user %}
+            <form method="post" action="{% url 'memes:delete' meme.pk %}" class="meme-delete-form">
+                {% csrf_token %}
+                <button type="submit" class="review-action review-action-delete"
+                        data-confirm="Удалить этот мем?">Удалить</button>
+            </form>
+            {% endif %}
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="place-empty">Опубликованных мемов пока нет.</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/memes.js' %}"></script>
+{% endblock %}

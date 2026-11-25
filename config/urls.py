@@ -14,6 +14,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('places/', include('places.urls')),
+    path('memes/', include('memes.urls')),
     path('', include('core.urls')),
 ]
 
