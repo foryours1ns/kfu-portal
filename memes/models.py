@@ -1,6 +1,13 @@
+import re
+
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.functions import Coalesce
+from django.urls import reverse
+from django.utils.html import format_html
+
+REPLY_PREFIX_RE = re.compile(r'^([A-Za-z0-9_]{3,15})(,\s*)(.*)$', re.DOTALL)
 
 
 class MemeQuerySet(models.QuerySet):
@@ -81,3 +88,48 @@ class MemeVote(models.Model):
     def __str__(self):
         sign = '+1' if self.value > 0 else '-1'
         return f'{self.user.username} → мем #{self.meme_id} ({sign})'
+
+
+class MemeComment(models.Model):
+    """Комментарий к опубликованному мему."""
+
+    meme = models.ForeignKey(
+        Meme,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='мем',
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='meme_comments',
+        verbose_name='автор',
+    )
+    text = models.TextField('текст комментария', max_length=300)
+    created_at = models.DateTimeField('дата создания', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'комментарий к мему'
+        verbose_name_plural = 'комментарии к мемам'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.author.username}: {self.text[:40]}'
+
+    def rendered_text(self):
+        """Если комментарий начинается с «username, ...» и такой пользователь
+        существует, превращает логин в начале в кликабельную ссылку на профиль."""
+        match = REPLY_PREFIX_RE.match(self.text)
+        if match:
+            username, comma_space, rest = match.groups()
+            User = get_user_model()
+            if User.objects.filter(username__iexact=username).exists():
+                profile_url = reverse('accounts:profile', args=[username])
+                return format_html(
+                    '<a class="comment-mention" href="{}">{}</a>{}{}',
+                    profile_url,
+                    username,
+                    comma_space,
+                    rest,
+                )
+        return self.text

@@ -57,7 +57,7 @@
                     Анонимно
                 </span>
                 {% endif %}
-                <span>· <span class="rating-score">★ {{ user_review.rating }}</span> · {{ user_review.created_at|date:"d.m.Y" }}</span>
+                <span>· <span class="rating-score">★ {{ user_review.rating }}</span> · {{ user_review.created_at|date:"d.m.Y H:i" }}</span>
                 {% if not user_review.is_published %}
                 <span class="review-unpublished">· скрыт модератором</span>
                 {% endif %}
@@ -68,7 +68,8 @@
                 <a href="{% url 'places:review_edit' place.pk user_review.pk %}" class="review-action">Изменить</a>
                 <form method="post" action="{% url 'places:review_delete' place.pk user_review.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="review-action review-action-delete">Удалить</button>
+                    <button type="submit" class="review-action review-action-delete"
+                            data-confirm="Удалить отзыв?">Удалить</button>
                 </form>
             </div>
             {% endif %}
@@ -106,7 +107,7 @@
                     Анонимно
                 </span>
                 {% endif %}
-                <span>· <span class="rating-score">★ {{ review.rating }}</span> · {{ review.created_at|date:"d.m.Y" }}</span>
+                <span>· <span class="rating-score">★ {{ review.rating }}</span> · {{ review.created_at|date:"d.m.Y H:i" }}</span>
             </div>
             <div class="review-text">{{ review.text|linebreaks }}</div>
         </li>

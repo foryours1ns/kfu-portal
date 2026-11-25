@@ -1,4 +1,5 @@
-// Страница мемов: раскрытие формы загрузки, удаление с подтверждением и голосование без перезагрузки.
+// Страница мемов: раскрытие формы загрузки и комментариев, ответ на комментарий,
+// удаление с подтверждением и голосование без перезагрузки.
 document.addEventListener('DOMContentLoaded', function () {
     var toggle = document.getElementById('meme-upload-toggle');
     var uploadForm = document.getElementById('meme-upload-form');
@@ -8,6 +9,33 @@ document.addEventListener('DOMContentLoaded', function () {
             toggle.setAttribute('aria-expanded', String(!isHidden));
         });
     }
+
+    var commentToggles = document.querySelectorAll('[data-comments-toggle]');
+    commentToggles.forEach(function (btn) {
+        var box = document.getElementById(btn.dataset.commentsToggle);
+        if (!box) {
+            return;
+        }
+        btn.addEventListener('click', function () {
+            var isHidden = box.toggleAttribute('hidden');
+            btn.setAttribute('aria-expanded', String(!isHidden));
+        });
+    });
+
+    var replyButtons = document.querySelectorAll('[data-reply-user]');
+    replyButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var textarea = document.getElementById(btn.dataset.replyTarget);
+            if (!textarea) {
+                return;
+            }
+            var prefix = btn.dataset.replyUser + ', ';
+            var current = textarea.value.replace(/^[A-Za-z0-9_]{3,15},\s*/, '');
+            textarea.value = prefix + current;
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        });
+    });
 
     var deleteButtons = document.querySelectorAll('[data-confirm]');
     deleteButtons.forEach(function (button) {

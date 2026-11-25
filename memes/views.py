@@ -3,33 +3,37 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from .forms import MemeForm
-from .models import Meme, MemeVote
+from .forms import MemeCommentForm, MemeForm
+from .models import Meme, MemeComment, MemeVote
 
 
-def meme_list(request):
-    """Лента опубликованных мемов с сортировкой «Новые / Топ» и формой загрузки."""
+def _render_meme_feed(
+    request,
+    *,
+    form=None,
+    form_open=False,
+    open_comments_id=None,
+    invalid_comment_form=None,
+):
+    """Общая отрисовка ленты мемов с голосами и комментариями."""
     sort = 'top' if request.GET.get('sort') == 'top' else 'new'
-    form_open = False
-
-    if request.method == 'POST':
-        if not request.user.is_authenticated:
-            return redirect_to_login(request.get_full_path())
-        form = MemeForm(request.POST, request.FILES)
-        if form.is_valid():
-            meme = form.save(commit=False)
-            meme.author = request.user
-            meme.is_published = False
-            meme.save()
-            messages.success(request, 'Мем отправлен на модерацию и появится после проверки')
-            return redirect('memes:list')
-        form_open = True
-    else:
+    if form is None:
         form = MemeForm()
 
-    memes_qs = Meme.objects.published().with_score().select_related('author')
+    if open_comments_id is None:
+        raw_comments_id = request.GET.get('comments', '')
+        if raw_comments_id.isdigit():
+            open_comments_id = int(raw_comments_id)
+
+    memes_qs = (
+        Meme.objects.published()
+        .with_score()
+        .select_related('author')
+        .prefetch_related('comments__author')
+    )
     if sort == 'top':
         memes_qs = memes_qs.order_by('-score', '-created_at')
     else:
@@ -46,13 +50,38 @@ def meme_list(request):
         )
     for meme in memes:
         meme.user_vote = user_votes.get(meme.pk, 0)
+        meme.comment_list = list(meme.comments.all())
+        meme.comment_count = len(meme.comment_list)
+        if invalid_comment_form is not None and meme.pk == open_comments_id:
+            meme.comment_form = invalid_comment_form
+        else:
+            meme.comment_form = MemeCommentForm(auto_id=f'id_meme_{meme.pk}_%s')
 
     return render(request, 'memes/meme_list.html', {
         'memes': memes,
         'sort': sort,
         'form': form,
         'form_open': form_open,
+        'open_comments_id': open_comments_id,
     })
+
+
+def meme_list(request):
+    """Лента опубликованных мемов с сортировкой «Новые / Топ» и формой загрузки."""
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        form = MemeForm(request.POST, request.FILES)
+        if form.is_valid():
+            meme = form.save(commit=False)
+            meme.author = request.user
+            meme.is_published = False
+            meme.save()
+            messages.success(request, 'Мем отправлен на модерацию и появится после проверки')
+            return redirect('memes:list')
+        return _render_meme_feed(request, form=form, form_open=True)
+
+    return _render_meme_feed(request)
 
 
 @login_required
@@ -98,3 +127,40 @@ def meme_delete(request, pk):
     meme.delete()
     messages.success(request, 'Мем удалён')
     return redirect('memes:list')
+
+
+@login_required
+@require_POST
+def meme_comment_create(request, pk):
+    """Добавление комментария к опубликованному мему."""
+    meme = get_object_or_404(Meme.objects.published(), pk=pk)
+    form = MemeCommentForm(request.POST, auto_id=f'id_meme_{meme.pk}_%s')
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.meme = meme
+        comment.author = request.user
+        comment.save()
+        messages.success(request, 'Комментарий опубликован')
+        return redirect(f"{reverse('memes:list')}?comments={meme.pk}")
+
+    return _render_meme_feed(
+        request,
+        open_comments_id=meme.pk,
+        invalid_comment_form=form,
+    )
+
+
+@login_required
+@require_POST
+def meme_comment_delete(request, pk, comment_pk):
+    """Удаление собственного комментария к мему."""
+    meme = get_object_or_404(Meme.objects.published(), pk=pk)
+    comment = get_object_or_404(
+        MemeComment,
+        pk=comment_pk,
+        meme=meme,
+        author=request.user,
+    )
+    comment.delete()
+    messages.success(request, 'Комментарий удалён')
+    return redirect(f"{reverse('memes:list')}?comments={meme.pk}")

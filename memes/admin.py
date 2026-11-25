@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Meme, MemeVote
+from .models import Meme, MemeComment, MemeVote
 
 
 @admin.register(Meme)
@@ -26,3 +26,9 @@ class MemeVoteAdmin(admin.ModelAdmin):
     list_display = ('meme', 'user', 'value', 'created_at')
     list_filter = ('value',)
     search_fields = ('user__username', 'meme__caption')
+
+
+@admin.register(MemeComment)
+class MemeCommentAdmin(admin.ModelAdmin):
+    list_display = ('meme', 'author', 'text', 'created_at')
+    search_fields = ('author__username', 'text', 'meme__caption')

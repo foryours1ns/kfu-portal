@@ -1,6 +1,15 @@
 // Выбор оценки звёздочками: подсветка при наведении курсора и фиксация по клику.
 // Пока оценка не выбрана (все звёзды потухшие), кнопка отправки неактивна.
 document.addEventListener('DOMContentLoaded', function () {
+    var deleteButtons = document.querySelectorAll('[data-confirm]');
+    deleteButtons.forEach(function (button) {
+        button.addEventListener('click', function (event) {
+            if (!window.confirm(button.dataset.confirm)) {
+                event.preventDefault();
+            }
+        });
+    });
+
     var widget = document.querySelector('[data-rating-widget]');
     if (!widget) {
         return;

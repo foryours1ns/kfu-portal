@@ -9,7 +9,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from PIL import Image
 
-from .models import Meme, MemeVote
+from .models import Meme, MemeComment, MemeVote
 
 User = get_user_model()
 
@@ -247,3 +247,106 @@ class MemeVoteTests(TempMediaMixin, TestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Meme.objects.filter(pk=self.meme.pk).exists())
+
+
+class MemeCommentTests(TempMediaMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = User.objects.create_user(username='commenter')
+        self.meme = Meme.objects.create(
+            author=self.user,
+            image=make_image_file(),
+            caption='Мем с комментариями',
+            is_published=True,
+        )
+        self.comment_url = reverse('memes:comment_create', args=[self.meme.pk])
+
+    def test_anonymous_user_cannot_post_comment(self):
+        response = self.client.post(self.comment_url, {'text': 'Привет'})
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('accounts:login'), response['Location'])
+        self.assertFalse(MemeComment.objects.exists())
+
+    def test_authenticated_user_can_post_comment(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.comment_url,
+            {'text': '  Жизненно на каждой сессии!  '},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        comment = MemeComment.objects.get(meme=self.meme)
+        self.assertEqual(comment.author, self.user)
+        self.assertEqual(comment.text, 'Жизненно на каждой сессии!')
+        self.assertContains(response, 'Комментарий опубликован')
+        self.assertContains(response, 'Комментарии (1)')
+        self.assertContains(response, 'Жизненно на каждой сессии!')
+
+    def test_blank_comment_is_rejected(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.comment_url, {'text': '   '})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Напишите текст комментария.')
+        self.assertFalse(MemeComment.objects.exists())
+
+    def test_author_can_delete_own_comment(self):
+        self.client.force_login(self.user)
+        comment = MemeComment.objects.create(
+            meme=self.meme,
+            author=self.user,
+            text='Удалю этот коммент',
+        )
+        response = self.client.post(
+            reverse('memes:comment_delete', args=[self.meme.pk, comment.pk]),
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(MemeComment.objects.filter(pk=comment.pk).exists())
+        self.assertContains(response, 'Комментарий удалён')
+
+    def test_other_user_cannot_delete_comment(self):
+        comment = MemeComment.objects.create(
+            meme=self.meme,
+            author=self.user,
+            text='Чужой коммент',
+        )
+        stranger = User.objects.create_user(username='stranger')
+        self.client.force_login(stranger)
+        response = self.client.post(
+            reverse('memes:comment_delete', args=[self.meme.pk, comment.pk]),
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(MemeComment.objects.filter(pk=comment.pk).exists())
+
+    def test_cannot_comment_on_unpublished_meme(self):
+        hidden = Meme.objects.create(
+            author=self.user,
+            image=make_image_file('hidden.png'),
+            is_published=False,
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse('memes:comment_create', args=[hidden.pk]),
+            {'text': 'Секретный коммент'},
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_reply_comment_links_mentioned_username_to_profile(self):
+        other = User.objects.create_user(username='aidar')
+        MemeComment.objects.create(
+            meme=self.meme,
+            author=other,
+            text='Первый коммент',
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.comment_url,
+            {'text': 'aidar, полностью согласен!'},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            '<a class="comment-mention" href="/accounts/users/aidar/">aidar</a>, полностью согласен!',
+        )
+        self.assertContains(response, 'data-reply-user="aidar"')

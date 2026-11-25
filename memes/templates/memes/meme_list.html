@@ -60,7 +60,7 @@
                 <img class="review-avatar" src="{{ meme.author.avatar_url }}" alt="" width="24" height="24">
                 {{ meme.author.username }}
             </a>
-            <span>· {{ meme.created_at|date:"d.m.Y" }}</span>
+            <span>· {{ meme.created_at|date:"d.m.Y H:i" }}</span>
         </div>
 
         {% if meme.caption %}
@@ -72,46 +72,54 @@
         </div>
 
         <div class="meme-footer">
-            {% if user.is_authenticated %}
-            <form method="post" action="{% url 'memes:vote' meme.pk %}" class="meme-vote-form" data-vote-form>
-                {% csrf_token %}
-                <button type="submit" name="value" value="1"
-                        class="vote-btn vote-up {% if meme.user_vote == 1 %}active{% endif %}"
-                        aria-label="За">
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/>
-                    </svg>
+            <div class="meme-actions-left">
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'memes:vote' meme.pk %}" class="meme-vote-form" data-vote-form>
+                    {% csrf_token %}
+                    <button type="submit" name="value" value="1"
+                            class="vote-btn vote-up {% if meme.user_vote == 1 %}active{% endif %}"
+                            aria-label="За">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/>
+                        </svg>
+                    </button>
+                    <span class="vote-score" data-vote-score>{{ meme.score }}</span>
+                    <button type="submit" name="value" value="-1"
+                            class="vote-btn vote-down {% if meme.user_vote == -1 %}active{% endif %}"
+                            aria-label="Против">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/>
+                        </svg>
+                    </button>
+                </form>
+                {% else %}
+                <div class="meme-vote-form">
+                    <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}"
+                       class="vote-btn" aria-label="Войти, чтобы проголосовать за">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/>
+                        </svg>
+                    </a>
+                    <span class="vote-score">{{ meme.score }}</span>
+                    <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}"
+                       class="vote-btn" aria-label="Войти, чтобы проголосовать против">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/>
+                        </svg>
+                    </a>
+                </div>
+                {% endif %}
+
+                <button type="button" class="meme-comment-toggle"
+                        data-comments-toggle="meme-comments-{{ meme.pk }}"
+                        aria-expanded="{% if open_comments_id == meme.pk %}true{% else %}false{% endif %}">
+                    Комментарии{% if meme.comment_count %} ({{ meme.comment_count }}){% endif %}
                 </button>
-                <span class="vote-score" data-vote-score>{{ meme.score }}</span>
-                <button type="submit" name="value" value="-1"
-                        class="vote-btn vote-down {% if meme.user_vote == -1 %}active{% endif %}"
-                        aria-label="Против">
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/>
-                    </svg>
-                </button>
-            </form>
-            {% else %}
-            <div class="meme-vote-form">
-                <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}"
-                   class="vote-btn" aria-label="Войти, чтобы проголосовать за">
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M8 13V3M3.5 7.5L8 3l4.5 4.5"/>
-                    </svg>
-                </a>
-                <span class="vote-score">{{ meme.score }}</span>
-                <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}"
-                   class="vote-btn" aria-label="Войти, чтобы проголосовать против">
-                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M8 3v10M3.5 8.5L8 13l4.5-4.5"/>
-                    </svg>
-                </a>
             </div>
-            {% endif %}
 
             {% if meme.author == user %}
             <form method="post" action="{% url 'memes:delete' meme.pk %}" class="meme-delete-form">
@@ -119,6 +127,62 @@
                 <button type="submit" class="review-action review-action-delete"
                         data-confirm="Удалить этот мем?">Удалить</button>
             </form>
+            {% endif %}
+        </div>
+
+        <div class="meme-comments" id="meme-comments-{{ meme.pk }}"
+             {% if open_comments_id != meme.pk %}hidden{% endif %}>
+            {% if meme.comment_list %}
+            <ul class="meme-comment-list">
+                {% for comment in meme.comment_list %}
+                <li class="meme-comment-item">
+                    <div class="meme-comment-top">
+                        <div class="review-header">
+                            <a class="review-author" href="{{ comment.author.get_absolute_url }}">
+                                <img class="review-avatar" src="{{ comment.author.avatar_url }}" alt="" width="20" height="20">
+                                {{ comment.author.username }}
+                            </a>
+                            <span>· {{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        {% if comment.author == user %}
+                        <form method="post" action="{% url 'memes:comment_delete' meme.pk comment.pk %}" class="meme-delete-form">
+                            {% csrf_token %}
+                            <button type="submit" class="review-action review-action-delete"
+                                    data-confirm="Удалить комментарий?">Удалить</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    <p class="meme-comment-text">{{ comment.rendered_text }}</p>
+                    {% if user.is_authenticated and comment.author != user %}
+                    <button type="button" class="comment-reply-btn"
+                            data-reply-user="{{ comment.author.username }}"
+                            data-reply-target="{{ meme.comment_form.text.id_for_label }}">
+                        Ответить
+                    </button>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="meme-comments-empty">Комментариев пока нет.</p>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'memes:comment_create' meme.pk %}" class="form meme-comment-form" novalidate>
+                {% csrf_token %}
+                <div class="field">
+                    <label for="{{ meme.comment_form.text.id_for_label }}" class="visually-hidden">
+                        {{ meme.comment_form.text.label }}
+                    </label>
+                    {{ meme.comment_form.text }}
+                    {% for error in meme.comment_form.text.errors %}
+                    <p class="field-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <button type="submit">Отправить</button>
+            </form>
+            {% else %}
+            <p class="meme-comments-note">Войдите, чтобы оставить комментарий</p>
             {% endif %}
         </div>
     </li>

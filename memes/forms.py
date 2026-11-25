@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import Meme
+from .models import Meme, MemeComment
 
 MAX_MEME_IMAGE_SIZE = 5 * 1024 * 1024  # 5 МБ
 
@@ -41,3 +41,32 @@ class MemeForm(forms.ModelForm):
 
     def clean_caption(self):
         return self.cleaned_data['caption'].strip()
+
+
+class MemeCommentForm(forms.ModelForm):
+    """Форма добавления комментария к мему."""
+
+    class Meta:
+        model = MemeComment
+        fields = ('text',)
+        labels = {
+            'text': 'Комментарий',
+        }
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Написать комментарий…',
+            }),
+        }
+        error_messages = {
+            'text': {
+                'required': 'Напишите текст комментария.',
+                'max_length': 'Комментарий не должен быть длиннее 300 символов.',
+            },
+        }
+
+    def clean_text(self):
+        text = self.cleaned_data['text'].strip()
+        if not text:
+            raise ValidationError('Напишите текст комментария.')
+        return text
