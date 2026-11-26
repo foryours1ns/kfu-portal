@@ -69,6 +69,146 @@ a {
     cursor: pointer;
 }
 
+/* Колокольчик и выпадающий список уведомлений в шапке */
+.notif-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.notif-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border: none;
+    background: none;
+    color: #777;
+    cursor: pointer;
+}
+
+.notif-bell:hover,
+.notif-bell[aria-expanded="true"] {
+    color: #e8590c;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #e8590c;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    text-align: center;
+}
+
+.notif-badge[hidden],
+.notif-dropdown[hidden],
+.notif-list[hidden],
+.notif-empty[hidden],
+#notif-read-all-form[hidden] {
+    display: none;
+}
+
+.notif-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 1500;
+    width: 320px;
+    max-width: calc(100vw - 40px);
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.notif-title {
+    color: #222;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.notif-read-all {
+    padding: 0;
+    border: none;
+    background: none;
+    color: #777;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.notif-read-all:hover {
+    color: #e8590c;
+}
+
+.notif-list {
+    max-height: 320px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
+}
+
+.notif-item {
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-item.unread {
+    background: #fff9f5;
+}
+
+.nav a.notif-link {
+    display: block;
+    padding: 10px 14px;
+    color: #222;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.notif-item.unread .notif-text {
+    font-weight: 600;
+}
+
+.nav a.notif-link:hover .notif-text {
+    color: #e8590c;
+}
+
+.notif-time {
+    display: block;
+    margin-top: 3px;
+    color: #777;
+    font-size: 12px;
+}
+
+.notif-empty {
+    margin: 0;
+    padding: 16px 14px;
+    color: #777;
+    font-size: 14px;
+    text-align: center;
+}
+
 /* Содержимое страницы */
 main {
     padding: 48px 0 72px;

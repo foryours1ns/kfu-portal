@@ -2,12 +2,18 @@ import io
 import shutil
 import tempfile
 
+from django.contrib.admin.sites import AdminSite
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, override_settings
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from PIL import Image
 
-from .models import User
+from memes.admin import MemeAdmin
+from memes.models import Meme
+from places.admin import ReviewAdmin
+from places.models import Place, Review
+
+from .models import Notification, User
 
 
 class SignupTests(TestCase):
@@ -279,5 +285,198 @@ class ProfileTests(TestCase):
                 )
                 self.user.refresh_from_db()
                 self.assertFalse(bool(self.user.avatar))
+        finally:
+            shutil.rmtree(temp_media, ignore_errors=True)
+
+
+class NotificationTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username='alice')
+        self.bob = User.objects.create_user(username='bob')
+        self.charlie = User.objects.create_user(username='charlie')
+
+    def _make_png(self):
+        buf = io.BytesIO()
+        Image.new('RGB', (16, 16), color=(232, 89, 12)).save(buf, format='PNG')
+        return SimpleUploadedFile('meme.png', buf.getvalue(), content_type='image/png')
+
+    def test_bell_and_unread_count_shown_in_header_for_authenticated_user(self):
+        Notification.objects.create(
+            recipient=self.alice,
+            message='Тестовое уведомление',
+            link='/memes/',
+        )
+        self.client.force_login(self.alice)
+        response = self.client.get(reverse('core:home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="notif-bell-btn"')
+        self.assertContains(response, 'Тестовое уведомление')
+        self.assertEqual(response.context['unread_notifications_count'], 1)
+
+    def test_notifications_poll_returns_json_for_current_user(self):
+        n = Notification.objects.create(
+            recipient=self.alice,
+            message='Новое событие',
+            link='/memes/',
+        )
+        Notification.objects.create(
+            recipient=self.bob,
+            message='Чужое событие',
+        )
+        self.client.force_login(self.alice)
+        response = self.client.get(reverse('accounts:notifications_poll'))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['unread_count'], 1)
+        self.assertEqual(len(data['notifications']), 1)
+        self.assertEqual(data['notifications'][0]['id'], n.pk)
+        self.assertEqual(data['notifications'][0]['message'], 'Новое событие')
+        self.assertFalse(data['notifications'][0]['is_read'])
+
+    def test_notification_read_marks_read_and_redirects_to_link(self):
+        n = Notification.objects.create(
+            recipient=self.alice,
+            message='Ответ под мемом',
+            link='/memes/',
+        )
+        # Чужой пользователь не может прочитать уведомление alice
+        self.client.force_login(self.bob)
+        stranger_res = self.client.get(reverse('accounts:notification_read', args=[n.pk]))
+        self.assertEqual(stranger_res.status_code, 404)
+        n.refresh_from_db()
+        self.assertFalse(n.is_read)
+
+        # Сама alice переходит по уведомлению
+        self.client.force_login(self.alice)
+        res = self.client.get(reverse('accounts:notification_read', args=[n.pk]))
+        self.assertRedirects(res, '/memes/', fetch_redirect_response=False)
+        n.refresh_from_db()
+        self.assertTrue(n.is_read)
+
+    def test_notifications_read_all_marks_all_user_notifications_read(self):
+        Notification.objects.create(recipient=self.alice, message='Первое')
+        Notification.objects.create(recipient=self.alice, message='Второе')
+        bob_notif = Notification.objects.create(recipient=self.bob, message='Бобу')
+
+        self.client.force_login(self.alice)
+        res = self.client.post(
+            reverse('accounts:notifications_read_all'),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json(), {'unread_count': 0})
+        self.assertEqual(self.alice.notifications.filter(is_read=False).count(), 0)
+        bob_notif.refresh_from_db()
+        self.assertFalse(bob_notif.is_read)
+
+    def test_comment_and_reply_create_notifications_without_duplicates(self):
+        temp_media = tempfile.mkdtemp()
+        try:
+            with override_settings(MEDIA_ROOT=temp_media):
+                meme = Meme.objects.create(
+                    author=self.alice,
+                    image=self._make_png(),
+                    caption='Мем Алисы',
+                    is_published=True,
+                )
+                comment_url = reverse('memes:comment_create', args=[meme.pk])
+
+                # 1) Алиса комментирует свой же мем — уведомлений себе нет
+                self.client.force_login(self.alice)
+                self.client.post(comment_url, {'text': 'Мой мем'})
+                self.assertEqual(Notification.objects.count(), 0)
+
+                # 2) Боб комментирует мем Алисы — Алисе приходит уведомление
+                self.client.force_login(self.bob)
+                self.client.post(comment_url, {'text': 'Классный мем'})
+                self.assertEqual(self.alice.notifications.count(), 1)
+                self.assertIn(
+                    'bob прокомментировал ваш мем',
+                    self.alice.notifications.first().message,
+                )
+
+                # 3) Чарли отвечает Бобу под мемом Алисы — уведомление и Бобу, и Алисе
+                self.client.force_login(self.charlie)
+                self.client.post(comment_url, {'text': 'bob, согласен!'})
+                self.assertEqual(self.bob.notifications.count(), 1)
+                self.assertIn(
+                    'charlie ответил на ваш комментарий к мему',
+                    self.bob.notifications.first().message,
+                )
+                self.assertEqual(self.alice.notifications.count(), 2)
+
+                # 4) Боб отвечает самой Алисе под её мемом — Алиса получает только 1 уведомление (об ответе)
+                self.client.force_login(self.bob)
+                self.client.post(comment_url, {'text': 'alice, спасибо за мем'})
+                self.assertEqual(self.alice.notifications.count(), 3)
+                self.assertIn(
+                    'bob ответил на ваш комментарий к мему',
+                    self.alice.notifications.first().message,
+                )
+        finally:
+            shutil.rmtree(temp_media, ignore_errors=True)
+
+    def test_admin_moderation_of_meme_and_review_creates_notifications(self):
+        temp_media = tempfile.mkdtemp()
+        try:
+            with override_settings(MEDIA_ROOT=temp_media):
+                site = AdminSite()
+                request = RequestFactory().post('/admin/')
+                request.user = self.bob
+
+                # Публикация и отклонение мема через MemeAdmin
+                meme = Meme.objects.create(
+                    author=self.alice,
+                    image=self._make_png(),
+                    caption='Очередь в буфет',
+                    is_published=False,
+                )
+                meme_admin = MemeAdmin(Meme, site)
+
+                class DummyForm:
+                    changed_data = ['is_published']
+
+                meme.is_published = True
+                meme_admin.save_model(request, meme, DummyForm(), change=True)
+                self.assertIn(
+                    'Модератор опубликовал ваш мем «Очередь в буфет»',
+                    self.alice.notifications.first().message,
+                )
+
+                meme.is_published = False
+                meme_admin.delete_model(request, meme)
+                self.assertIn(
+                    'Модератор отклонил ваш мем «Очередь в буфет»',
+                    self.alice.notifications.first().message,
+                )
+
+                # Скрытие и удаление отзыва через ReviewAdmin
+                place = Place.objects.create(
+                    name='Столовая УНИКС',
+                    category=Place.Category.CANTEEN,
+                    address='Профессора Нужина, 2',
+                    latitude='55.792100',
+                    longitude='49.122100',
+                )
+                review = Review.objects.create(
+                    place=place,
+                    author=self.alice,
+                    rating=5,
+                    text='Вкусные треугольники',
+                    is_published=True,
+                )
+                review_admin = ReviewAdmin(Review, site)
+                review.is_published = False
+                review_admin.save_model(request, review, DummyForm(), change=True)
+                self.assertIn(
+                    'Модератор скрыл ваш отзыв о заведении «Столовая УНИКС»',
+                    self.alice.notifications.first().message,
+                )
+
+                review_admin.delete_model(request, review)
+                self.assertIn(
+                    'Модератор удалил ваш отзыв о заведении «Столовая УНИКС»',
+                    self.alice.notifications.first().message,
+                )
         finally:
             shutil.rmtree(temp_media, ignore_errors=True)

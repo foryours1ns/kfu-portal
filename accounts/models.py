@@ -1,5 +1,6 @@
 from urllib.parse import quote
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
@@ -115,3 +116,26 @@ class User(AbstractUser):
         if self.avatar:
             return self.avatar.url
         return build_letter_avatar_svg(self.username)
+
+
+class Notification(models.Model):
+    """Уведомление пользователя о событиях на портале."""
+
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+        verbose_name='получатель',
+    )
+    message = models.CharField('текст уведомления', max_length=255)
+    link = models.CharField('ссылка', max_length=255, blank=True)
+    is_read = models.BooleanField('прочитано', default=False)
+    created_at = models.DateTimeField('дата создания', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'уведомление'
+        verbose_name_plural = 'уведомления'
+        ordering = ['-created_at', '-id']
+
+    def __str__(self):
+        return f'{self.recipient.username}: {self.message[:50]}'

@@ -19,4 +19,7 @@ urlpatterns = [
     ),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('users/<str:username>/', views.profile_detail, name='profile'),
+    path('notifications/poll/', views.notifications_poll, name='notifications_poll'),
+    path('notifications/read-all/', views.notifications_read_all, name='notifications_read_all'),
+    path('notifications/<int:pk>/read/', views.notification_read, name='notification_read'),
 ]

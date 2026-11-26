@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseBadRequest, JsonResponse
@@ -6,8 +7,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from accounts.models import Notification
+
 from .forms import MemeCommentForm, MemeForm
-from .models import Meme, MemeComment, MemeVote
+from .models import REPLY_PREFIX_RE, Meme, MemeComment, MemeVote
 
 
 def _render_meme_feed(
@@ -129,6 +132,31 @@ def meme_delete(request, pk):
     return redirect('memes:list')
 
 
+def _notify_on_comment(meme, comment):
+    """Создаёт уведомления об ответе на комментарий и о новом комментарии к мему."""
+    comment_link = f"{reverse('memes:list')}?comments={meme.pk}#meme-{meme.pk}"
+    replied_user = None
+
+    match = REPLY_PREFIX_RE.match(comment.text)
+    if match:
+        replied_username = match.group(1)
+        User = get_user_model()
+        replied_user = User.objects.filter(username__iexact=replied_username).first()
+        if replied_user and replied_user != comment.author:
+            Notification.objects.create(
+                recipient=replied_user,
+                message=f'{comment.author.username} ответил на ваш комментарий к мему',
+                link=comment_link,
+            )
+
+    if meme.author != comment.author and meme.author != replied_user:
+        Notification.objects.create(
+            recipient=meme.author,
+            message=f'{comment.author.username} прокомментировал ваш мем',
+            link=comment_link,
+        )
+
+
 @login_required
 @require_POST
 def meme_comment_create(request, pk):
@@ -140,6 +168,7 @@ def meme_comment_create(request, pk):
         comment.meme = meme
         comment.author = request.user
         comment.save()
+        _notify_on_comment(meme, comment)
         messages.success(request, 'Комментарий опубликован')
         return redirect(f"{reverse('memes:list')}?comments={meme.pk}")
 
